@@ -1,0 +1,44 @@
+# roles/postgres_zabbix/tasks/main.yml
+
+- name: Installer la bibliothèque Python psycopg2
+  ansible.builtin.yum:
+    name: python3-psycopg2
+    state: present
+
+- name: Installer PostgreSQL server
+  ansible.builtin.yum:
+    name:
+      - postgresql-server
+      - postgresql
+    state: present
+
+- name: Initialiser PostgreSQL (si non déjà fait)
+  ansible.builtin.command: /usr/bin/postgresql-setup --initdb
+  args:
+    creates: /var/lib/pgsql/data/PG_VERSION
+
+- name: Modifier listen_addresses pour PostgreSQL
+  ansible.builtin.lineinfile:
+    path: /var/lib/pgsql/data/postgresql.conf
+    regexp: '^#?listen_addresses ='
+    line: "listen_addresses = '{{ postgres_listen_addresses }}'"
+  notify: Restart PostgreSQL
+
+- name: Démarrer et activer PostgreSQL
+  ansible.builtin.service:
+    name: postgresql
+    state: started
+    enabled: true
+
+- name: Configurer pg_hba.conf pour les IPs autorisées
+  include_tasks: configure_pg_hba.yaml
+
+- name: Redémarrer PostgreSQL si nécessaire
+  ansible.builtin.meta: flush_handlers
+
+- name: Ouvrir le port PostgreSQL dans le pare-feu
+  ansible.posix.firewalld:
+    port: 5432/tcp
+    permanent: true
+    state: enabled
+    immediate: true

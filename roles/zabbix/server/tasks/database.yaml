@@ -1,0 +1,39 @@
+- name: Créer l'utilisateur Zabbix PostgreSQL
+  become_user: postgres
+  delegate_to: "{{ zabbix_db_host_name }}"
+  postgresql_user:
+    name: "{{ zabbix_db_user }}"
+    password: "{{ zabbix_db_password }}"
+    state: present
+
+- name: Créer la base de données Zabbix
+  become_user: postgres
+  delegate_to: "{{ zabbix_db_host_name }}"
+  postgresql_db:
+    name: "{{ zabbix_db_name }}"
+    owner: "{{ zabbix_db_user }}"
+    encoding: UTF8
+    state: present
+
+- name: Vérifier si la table "users" existe dans la base Zabbix (déjà initialisée ?)
+  ansible.builtin.shell: |
+    PGPASSWORD="{{ zabbix_db_password }}" \
+    psql -U {{ zabbix_db_user }} -h {{ zabbix_db_host }} -d {{ zabbix_db_name }} -tAc "SELECT 1 FROM users LIMIT 1;"
+  register: zabbix_db_check
+  changed_when: false
+  failed_when: false
+
+- name: Importer la base de données Zabbix si elle n'est pas encore initialisée
+  ansible.builtin.shell: |
+    zcat /usr/share/zabbix/sql-scripts/postgresql/server.sql.gz | \
+    psql -U {{ zabbix_db_user }} -h {{ zabbix_db_host }} -d {{ zabbix_db_name }}
+  environment:
+    PGPASSWORD: "{{ zabbix_db_password }}"
+  args:
+    executable: /bin/bash
+  when: zabbix_db_check.stdout.strip() == ""
+  register: zabbix_db_import
+  changed_when: "'INSERT INTO' in zabbix_db_import.stdout or zabbix_db_import.rc == 0"
+
+
+  

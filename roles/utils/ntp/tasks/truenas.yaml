@@ -1,0 +1,29 @@
+- name: Installer chrony
+  ansible.builtin.apt:
+    name: chrony
+    state: present
+    update_cache: yes
+
+- name: Configurer les serveurs NTP
+  ansible.builtin.lineinfile:
+    path: /etc/chrony/chrony.conf
+    regexp: '^pool '
+    line: ""
+    state: absent
+  notify: Restart chronyd
+
+- name: Ajouter serveurs NTP
+  ansible.builtin.blockinfile:
+    path: /etc/chrony/chrony.conf
+    marker: "# {mark} ANSIBLE MANAGED NTP"
+    block: |
+      {% for server in ntp_servers %}
+      pool {{ server }} iburst
+      {% endfor %}
+  notify: Restart chronyd
+
+- name: Activer/démarrer chrony
+  ansible.builtin.service:
+    name: chrony
+    enabled: true
+    state: started

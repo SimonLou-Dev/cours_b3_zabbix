@@ -1,0 +1,9 @@
+- name: Installation & configuration de NTP ({{ ansible_os_family }})
+  ansible.builtin.include_tasks: "{{ item.value}}"
+  when: ansible_os_family == item.key
+  loop:
+    - { key: "RedHat",     value: "linux.yaml" }
+    - { key: "Debian",     value: "truenas.yaml" }
+    - { key: "Windows",    value: "windows.yaml" }
+  loop_control:
+    label: "{{ item.key }}"

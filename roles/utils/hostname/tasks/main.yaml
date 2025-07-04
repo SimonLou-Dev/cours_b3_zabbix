@@ -1,0 +1,16 @@
+- name: Définir le nom d'hôte sur Rocky, Alma, RHEL, Debian, TrueNAS
+  hostname:
+    name: "{{ inventory_hostname }}"
+  when: ansible_os_family in ['RedHat', 'Debian']
+
+- name: Définir le nom d'hôte sur Windows
+  ansible.windows.win_hostname:
+    name: "{{ inventory_hostname }}"
+  register: win_hostname_result
+  when: ansible_os_family == 'Windows'
+
+- name: Redémarrer si le hostname Windows a changé
+  ansible.windows.win_reboot:
+  when:
+    - ansible_os_family == 'Windows'
+    - win_hostname_result.changed

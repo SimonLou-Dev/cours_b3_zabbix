@@ -1,0 +1,65 @@
+- name: Installer le dépôt Zabbix via rpm
+  shell: |
+    rpm -Uvh https://repo.zabbix.com/zabbix/7.4/release/alma/9/noarch/zabbix-release-latest-7.4.el9.noarch.rpm
+  args:
+    creates: /etc/yum.repos.d/zabbix.repo
+
+- name: Nettoyer les métadonnées YUM
+  shell: dnf clean all
+  changed_when: false
+
+
+- name: Installation des paquets Zabbix
+  yum:
+    name: 
+      - zabbix-server-pgsql
+      - zabbix-web-pgsql
+      - zabbix-apache-conf
+      - zabbix-sql-scripts
+      - zabbix-selinux-policy
+      - zabbix-agent
+      - postgresql
+    state: present
+
+- name: Ecriture de la configuration zabbix serveur
+  template:
+    src: zabbix_server.conf.j2
+    dest: /etc/zabbix/zabbix_server.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart zabbix-server
+
+
+- name: Ecriture de la configuration zabbix web
+  template:
+    src: zabbix.conf.php.j2
+    dest: /etc/zabbix/web/zabbix.conf.php
+    owner: root
+    group: apache
+    mode: '0640'
+  notify: Restart zabbix-server
+
+
+- name: Configuration de la DB Zabbix
+  include_tasks: "database.yaml"
+
+- name: Autoriser Zabbix Server (10051/tcp) dans firewalld
+  ansible.posix.firewalld:
+    port: 10051/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: Démarrage des services Zabbix
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - zabbix-server
+    - zabbix-agent
+
+
+- name: forcer les handlers
+  meta: flush_handlers

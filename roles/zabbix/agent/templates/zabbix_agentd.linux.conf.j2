@@ -1,0 +1,15 @@
+# ANSIBLE MANAGED
+
+LogFile=/var/log/zabbix/zabbix_agent2.log
+LogFileSize=0
+
+Server={{ zabbix_server }}
+ServerActive={{ zabbix_server }}
+
+Hostname={{ inventory_hostname }}
+
+ListenIP=0.0.0.0
+
+ControlSocket=/tmp/agent.sock
+
+Include=/etc/zabbix/zabbix_agent2.d/plugins.d/*.conf

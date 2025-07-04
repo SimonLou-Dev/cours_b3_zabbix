@@ -1,0 +1,6 @@
+- name: Restart Zabbix Agent
+  ansible.builtin.service:
+    name: zabbix-agent2
+    state: restarted
+    enabled: true
+  when: ansible_os_family != 'Windows'

@@ -1,0 +1,20 @@
+
+- name: Installation et configuration de Zabbix Server
+  include_tasks: "zabbix.yaml"
+
+
+
+- name: Installation et configuration du serveur apache
+  include_tasks: "apache.yaml"
+
+
+
+- name: Démarrage des services
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - zabbix-server
+    - zabbix-agent
+    - httpd

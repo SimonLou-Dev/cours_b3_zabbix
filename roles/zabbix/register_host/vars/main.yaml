@@ -1,0 +1,6 @@
+ansible_network_os: community.zabbix.zabbix
+ansible_connection: httpapi
+ansible_httpapi_use_ssl: false
+ansible_httpapi_validate_certs: false
+ansible_httpapi_port: 80
+ansible_zabbix_url_path: "zabbix"

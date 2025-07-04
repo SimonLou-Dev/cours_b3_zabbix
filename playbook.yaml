@@ -1,0 +1,30 @@
+# - name: Installation des prérequis
+#   hosts: all
+#   become: true
+#   become_method: sudo
+#   roles:
+#     - utils/ntp
+#     - utils/hostname
+
+# - name: Installation de PostgreSQL
+#   hosts: database
+#   become: true
+#   become_method: sudo
+#   roles:
+#     - database
+
+# - name: Installation du serveur zabbix
+#   hosts: zabbix_servers
+#   become: true
+#   become_method: sudo
+#   roles:
+#     - zabbix/server
+
+- name: Installation de l'agent Zabbix
+  hosts: all, !zabbix_servers
+  become: true
+  become_method: sudo
+  collections:
+    - community.zabbix
+  roles:
+    - zabbix/agent

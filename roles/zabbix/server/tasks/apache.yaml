@@ -1,0 +1,49 @@
+- name: Déployer la configuration Apache pour PHP-FPM
+  ansible.builtin.template:
+    src: httpd.php_fpm.conf.j2
+    dest: /etc/httpd/conf.d/php-fpm.conf
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: S'assurer qu'Apache écoute sur toutes les interfaces
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^Listen'
+    line: 'Listen 0.0.0.0:80'
+    state: present
+  notify: Restart Apache
+
+- name: Définir ServerName
+  ansible.builtin.lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regexp: '^#?ServerName'
+    line: 'ServerName {{ inventory_hostname }}'
+    state: present
+  notify: Restart Apache
+
+- name: Configurer la timezone PHP pour Zabbix
+  lineinfile:
+    path: /etc/php-fpm.d/zabbix.conf
+    regexp: '^;?php_value\[date.timezone\]'
+    line: 'php_value[date.timezone] = {{ zabbix_php_timezone }}'
+  notify: Restart PHP-FPM
+
+- name: Démarrage de httpd et PHP-FPM
+  service:
+    name: "{{ item }}"
+    state: started
+    enabled: true
+  loop:
+    - php-fpm
+    - httpd
+
+- name: Autoriser l'accès à l'interface Zabbix (80/tcp) dans firewalld
+  ansible.posix.firewalld:
+    port: 80/tcp
+    permanent: true
+    state: enabled
+    immediate: true
+
+- name: forcer les handlers
+  meta: flush_handlers

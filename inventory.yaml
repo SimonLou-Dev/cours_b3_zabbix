@@ -1,0 +1,25 @@
+all:
+  children:
+    zabbix_servers:
+      hosts:
+        zabbix-server:
+          ansible_host: 192.168.232.5
+          ansible_user: simonlou
+          ansible_become_password: "{{ become_pass }}"
+    database:
+      hosts:
+        zabbix-database:
+          ansible_host: 192.168.232.10
+          ansible_user: simonlou
+          ansible_become_password: "{{ become_pass }}"
+          zabbix_host_group: "Linux servers"
+          zabbix_template: "Linux by Zabbix agent active"
+
+    # zabbix_clients:
+    # hosts:
+    #   zabbix-client-linux:
+    #     ansible_host: 192.168.232
+    #   zabbix-client-windows:
+    #     ansible_host: 192.168.232
+    #   zabbix-client-nas:
+    #     ansible_host: 192.168.232

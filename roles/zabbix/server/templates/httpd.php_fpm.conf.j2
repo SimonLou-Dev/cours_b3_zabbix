@@ -1,0 +1,11 @@
+# ANSIBLE MANAGED: PHP-FPM via Apache (FastCGI)
+# This config passes .php files to php-fpm using UNIX socket
+
+<FilesMatch \.php$>
+    SetHandler "proxy:unix:/run/php-fpm/www.sock|fcgi://localhost/"
+</FilesMatch>
+
+# Optional: deny access to .ht* files
+<FilesMatch "^\.ht">
+    Require all denied
+</FilesMatch>

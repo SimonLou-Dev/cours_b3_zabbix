@@ -1,0 +1,29 @@
+- name: Installer le dépôt Zabbix via rpm
+  shell: |
+    rpm -Uvh https://repo.zabbix.com/zabbix/7.4/release/alma/9/noarch/zabbix-release-latest-7.4.el9.noarch.rpm
+  args:
+    creates: /etc/yum.repos.d/zabbix.repo
+
+- name: Nettoyer les métadonnées YUM
+  shell: dnf clean all
+  changed_when: false
+
+- name: Installer l’agent Zabbix
+  ansible.builtin.yum:
+    name: zabbix-agent2
+    state: present
+
+- name: Déployer la configuration de l’agent
+  ansible.builtin.template:
+    src: zabbix_agentd.linux.conf.j2
+    dest: /etc/zabbix/zabbix_agent2.conf
+    owner: root
+    group: root
+    mode: '0644'
+  notify: Restart Zabbix Agent
+
+- name: Activer et démarrer l’agent
+  ansible.builtin.service:
+    name: zabbix-agent2
+    enabled: true
+    state: started

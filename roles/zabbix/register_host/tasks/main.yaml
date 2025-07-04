@@ -1,0 +1,22 @@
+- name: Enregistrer l’hôte dans Zabbix
+  become: false
+  delegate_to: "zabbix-server"
+  community.zabbix.zabbix_host:
+    host_name: "{{ inventory_hostname }}"
+    visible_name: "{{ inventory_hostname }}"
+    host_groups:
+      - "{{ zabbix_host_group }}"
+    link_templates:
+      - "{{ zabbix_template }}"
+    interfaces:
+      - type: 1
+        main: 1
+        useip: 1
+        ip: "{{ hostvars[inventory_hostname]['ansible_default_ipv4']['address'] }}"
+        dns: ""
+        port: "10050"
+    state: present 
+  vars:
+    ansible_user: "{{ zabbix_web_user }}"
+    ansible_httpapi_pass: "{{ zabbiw_web_password }}"
+

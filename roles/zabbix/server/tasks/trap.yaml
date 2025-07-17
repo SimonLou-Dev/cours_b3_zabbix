@@ -1,0 +1,38 @@
+- name: Install snmptrapd
+  package:
+    name:
+      - net-snmp
+      - net-snmp-utils
+    state: present
+
+- name: Téléchargement du script de lecture snmp
+  ansible.builtin.get_url:
+    url: https://raw.githubusercontent.com/TheAldin/scripts/main/snmpparser.sh
+    dest: /etc/snmp/snmpparser.sh
+    mode: '0744'
+
+- name: Configure snmptrapd
+  template:
+    src: traps/snmptrapd.conf.j2
+    dest: /etc/snmp/snmptrapd.conf
+  notify:
+    - Restart snmptrapd
+
+- name: Activation au démarrage de snmptrapd
+  ansible.builtin.systemd:
+    name: snmptrapd
+    enabled: true
+    state: started
+
+- name: Création du fichier de log snmp
+  file:
+    state: directory
+    mode: '0755'
+    path: /var/log/snmptrap
+
+- name: Autoriser le SNMP (162/udp) dans firewalld
+  ansible.posix.firewalld:
+    port: 162/udp
+    permanent: true
+    state: enabled
+    immediate: true

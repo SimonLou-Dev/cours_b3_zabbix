@@ -1,13 +1,12 @@
 
+- name: Installation et configuration du trap SNMP
+  include_tasks: "trap.yaml"
+
 - name: Installation et configuration de Zabbix Server
   include_tasks: "zabbix.yaml"
 
-
-
 - name: Installation et configuration du serveur apache
   include_tasks: "apache.yaml"
-
-
 
 - name: Démarrage des services
   service:

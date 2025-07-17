@@ -12,3 +12,8 @@
   ansible.builtin.service:
     name: zabbix-server
     state: restarted
+
+- name: Restart snmptrapd
+  ansible.builtin.service:
+    name: snmpd
+    state: restarted

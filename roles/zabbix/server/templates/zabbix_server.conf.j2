@@ -11,7 +11,9 @@ DBName={{ zabbix_db_name }}
 DBUser={{ zabbix_db_user }}
 DBPassword={{ zabbix_db_password }}
 
-SNMPTrapperFile=/var/log/snmptrap/snmptrap.log
+StartSNMPTrapper=1
+SNMPTrapperFile=/var/log/snmptrap/zabbix_traps.tmp
+
 FpingLocation=/usr/bin/fping
 Fping6Location=/usr/bin/fping6
 LogSlowQueries=3000

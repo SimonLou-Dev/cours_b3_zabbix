@@ -1,6 +1,6 @@
-# - name: Enregistrer l’hôte dans Zabbix via API
-#   include_role:
-#     name: zabbix/register_host
+- name: Enregistrer l’hôte dans Zabbix via API
+  include_role:
+    name: zabbix/register_host
     
 - name: Installation & configuration de l'agent zabbix sur ({{ ansible_os_family }})
   ansible.builtin.include_tasks: "{{ item.value}}"
